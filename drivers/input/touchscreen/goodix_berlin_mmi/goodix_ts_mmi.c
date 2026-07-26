@@ -1023,7 +1023,7 @@ static int goodix_ts_mmi_charger_mode(struct device *dev, int mode)
 		ts_err("Failed to set charger mode\n");
 	}
 	msleep(20);
-	ts_err("Success to %s charger mode\n", mode ? "Enable" : "Disable");
+	ts_info("Success to %s charger mode\n", mode ? "Enable" : "Disable");
 	mutex_unlock(&core_data->mode_lock);
 
 	return 0;
@@ -1142,6 +1142,15 @@ static int goodix_ts_mmi_panel_state(struct device *dev,
 			core_data->gesture_enabled = false;
 			hw_ops->irq_enable(core_data, true);
 		}
+		break;
+	case TS_MMI_PM_GESTURE_SINGLE:
+	case TS_MMI_PM_GESTURE_DOUBLE:
+	case TS_MMI_PM_GESTURE_ZERO:
+	case TS_MMI_PM_GESTURE_SWITCH:
+		/* goodix_berlin_gesture_setup() reads the gesture bitmask
+		 * directly from touch_cdev->gesture_mode_type, so these
+		 * per-gesture mode transitions do not need additional HW
+		 * configuration -- just avoid falling into default error. */
 		break;
 	default:
 		ts_err("Invalid power state parameter %d.\n", to);
